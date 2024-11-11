@@ -31,8 +31,15 @@ jobs:
         GCP_IP: ${{ secrets.GCP_IP }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
+        # Save the SSH key to a file and set permissions
         echo "$SSH_KEY" > key
         chmod 600 key
-        scp -i key -r build/web/* $USERNAME@$GCP_IP:/web
-        ssh -i key $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+
+        # Disable strict host key checking and copy the web build files
+        scp -o StrictHostKeyChecking=no -i key -r build/web/* $USERNAME@$GCP_IP:/web
+
+        # Restart Nginx on the server
+        ssh -o StrictHostKeyChecking=no -i key $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+
+        # Remove the SSH key file for security
         rm key
