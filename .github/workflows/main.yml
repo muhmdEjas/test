@@ -31,7 +31,7 @@ jobs:
         GCP_IP: ${{ secrets.GCP_IP }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
-        # Save the SSH private key from secrets
+        
         echo "$SSH_KEY" > key.pem
         chmod 600 key.pem
         
