@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3  # Use the latest version of the checkout action
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
@@ -31,8 +31,15 @@ jobs:
         GCP_IP: ${{ secrets.GCP_IP }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
+        # Save the SSH private key from secrets
         echo "$SSH_KEY" > key.pem
         chmod 600 key.pem
+        
+        # Copy the web build files to the GCP instance
         scp -o StrictHostKeyChecking=no -i key.pem -r build/web/* $USERNAME@$GCP_IP:/web
+        
+        # Restart Nginx on the server to serve updated files
         ssh -o StrictHostKeyChecking=no -i key.pem $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+        
+        # Clean up the SSH key file
         rm key.pem
