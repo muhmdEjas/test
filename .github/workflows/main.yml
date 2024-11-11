@@ -33,6 +33,6 @@ jobs:
       run: |
         echo "$SSH_KEY" > key.pem
         chmod 600 key.pem
-        scp -i key.pem -r build/web/* $USERNAME@$GCP_IP:/web
-        ssh -i key.pem $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+        scp -o StrictHostKeyChecking=no -i key.pem -r build/web/* $USERNAME@$GCP_IP:/web
+        ssh -o StrictHostKeyChecking=no -i key.pem $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
         rm key.pem
