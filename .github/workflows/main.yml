@@ -25,21 +25,21 @@ jobs:
     - name: Build Flutter Web
       run: flutter build web
 
+    - name: Set up SSH agent
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        eval $(ssh-agent -s)
+        ssh-add ~/.ssh/id_rsa
+
     - name: Deploy to GCP Instance
       env:
-        SSH_KEY: ${{ secrets.MY_KEY }}
         GCP_IP: ${{ secrets.GCP_IP }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
-        # Save the SSH key to a file and set permissions
-        echo "$SSH_KEY" > key
-        chmod 600 key
-
         # Disable strict host key checking and copy the web build files with verbose output
-        scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i key -r build/web/* $USERNAME@$GCP_IP:/web
+        scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r build/web/* $USERNAME@$GCP_IP:/web
 
         # Restart Nginx on the server with verbose output
-        ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i key $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
-
-        # Remove the SSH key file for security
-        rm key
+        ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
