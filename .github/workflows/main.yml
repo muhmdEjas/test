@@ -16,7 +16,7 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.4'  
+        flutter-version: '3.16.4'
         channel: 'stable'
 
     - name: Install Dependencies
@@ -35,11 +35,11 @@ jobs:
         echo "$SSH_KEY" > key
         chmod 600 key
 
-        # Disable strict host key checking and copy the web build files
-        scp -o StrictHostKeyChecking=no -i key -r build/web/* $USERNAME@$GCP_IP:/web
+        # Disable strict host key checking and copy the web build files with verbose output
+        scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i key -r build/web/* $USERNAME@$GCP_IP:/web
 
-        # Restart Nginx on the server
-        ssh -o StrictHostKeyChecking=no -i key $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+        # Restart Nginx on the server with verbose output
+        ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i key $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
 
         # Remove the SSH key file for security
         rm key
