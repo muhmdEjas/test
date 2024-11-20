@@ -29,6 +29,9 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.MY_KEY }}
+      env:
+        SSH_ASKPASS: /usr/bin/echo
+        SSH_PASSPHRASE: ${{ secrets.SSH_KEY_PASSPHRASE }}
 
     # Step 5: Upload the web build to the VM
     - name: Upload build to VM
