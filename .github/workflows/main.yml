@@ -24,8 +24,10 @@ jobs:
     - name: Build Flutter web
       run: flutter build web --release
 
+   # Step 4: Create .ssh directory if it doesn't exist and add VM's host key to known_hosts
     - name: Add VM to known_hosts
       run: |
+        mkdir -p ~/.ssh
         echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
 
