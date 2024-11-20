@@ -3,7 +3,7 @@ name: Deploy Flutter Web Build to GCP VM
 on:
   push:
     branches:
-      - main  # Adjust this to your deployment branch
+      - branch_1 # Adjust this to your deployment branch
 
 jobs:
   deploy:
