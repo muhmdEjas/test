@@ -1,46 +1,36 @@
-name: Flutter Web Deploy to GCP
+name: Deploy Flutter Web Build to GCP VM
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust this to your deployment branch
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
 
+    steps:
+    # Step 1: Check out the repository code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Flutter environment
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.4'
-        channel: 'stable'
+        flutter-version: "3.16.4" 
 
-    - name: Install Dependencies
-      run: flutter pub get
+    # Step 3: Build the Flutter web project
+    - name: Build Flutter web
+      run: flutter build web --release
 
-    - name: Build Flutter Web
-      run: flutter build web
+    # Step 4: Set up SSH authentication
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Set up SSH key
+    # Step 5: Upload the web build to the VM
+    - name: Upload build to VM
       run: |
-        # Ensure the .ssh directory exists
-        mkdir -p ~/.ssh
-
-        # Save the SSH key to a file and set permissions
-        echo "$SSH_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-
-    - name: Deploy to GCP Instance
-      env:
-        GCP_IP: ${{ secrets.GCP_IP }}
-        USERNAME: ${{ secrets.USERNAME }}
-      run: |
-        # Disable strict host key checking and copy the web build files with verbose output
-        scp -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r build/web/* $USERNAME@$GCP_IP:/web
-
-        # Restart Nginx on the server with verbose output
-        ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $USERNAME@$GCP_IP 'sudo systemctl restart nginx'
+        scp -r ./build/web/* ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:/web
